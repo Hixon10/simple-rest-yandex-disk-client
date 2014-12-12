@@ -3,6 +3,7 @@
 import requests
 
 from src.Directory import Directory
+
 from src.Disk import Disk
 from src.File import File
 from src.YandexDiskException import YandexDiskException
@@ -134,6 +135,21 @@ class YandexDiskRestClient:
         r = requests.post(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
+    def upload_file(self, path_from, path_to):
+        url = self._base_url + "/resources/upload"
+
+        payload = {'path': path_to}
+        r = requests.get(url, headers=self.base_headers, params=payload)
+        self._check_code(r)
+
+        json_dict = r.json()
+        upload_link = json_dict["href"]
+
+        files = {'file': open(path_from, 'rb')}
+
+        r2 = requests.put(upload_link, headers=self.base_headers, files=files)
+        self._check_code(r2)
+
     def _get_dictionary_of_published_files(self):
         url = self._base_url + "/resources/public"
 
@@ -153,7 +169,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(token)
-    client.unpublish_folder_or_file("Горы.jpg")
+    client.upload_file("C:\\Users\\Public\\Pictures\\Sample Pictures\\Desert.jpg", "/Desert213.jpg")
 
 
 if __name__ == "__main__":
