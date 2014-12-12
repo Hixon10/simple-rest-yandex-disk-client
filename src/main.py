@@ -3,6 +3,56 @@
 import requests
 
 
+class Disk:
+    def __init__(self, trash_size, total_space, used_space, system_folders):
+        self.trash_size = trash_size
+        self.total_space = total_space
+        self.used_space = used_space
+        self.system_folders = system_folders
+
+
+class Element:
+    def __init__(self, name, created, modified, path, typ):
+        self.name = name
+        self.created = created
+        self.modified = modified
+        self.path = path
+        self.type = typ
+
+    def is_dir(self):
+        return False
+
+    def is_file(self):
+        return False
+
+
+class File(Element):
+    def __init__(self, name, created, modified, media_type, path, md5, typ, mime_type, size):
+        super().__init__(name, created, modified, path, typ)
+        self.media_type = media_type
+        self.md5 = md5
+        self.mime_type = mime_type
+        self.size = size
+
+    def is_dir(self):
+        return False
+
+    def is_file(self):
+        return True
+
+
+class Directory(Element):
+    def __init__(self, name, created, modified, path, typ):
+        super().__init__(name, created, modified, path, typ)
+
+    def is_dir(self):
+        return True
+
+    def is_file(self):
+        return False
+
+
+
 class YandexDiskRestClient:
     _base_url = "https://cloud-api.yandex.net:443/v1/disk"
 
@@ -12,20 +62,31 @@ class YandexDiskRestClient:
         self.token = token
 
         self.base_headers = {
-            "Accept"        :   "application/json",
-            "Authorization" :   "OAuth " + self.token,
-            "User-Agent"    :   "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0",
-            "Host"          :   "cloud-api.yandex.net"
+            "Accept": "application/json",
+            "Authorization": "OAuth " + self.token,
+            "User-Agent": "Mozilla/5.0 (Windows NT 6.3; rv:36.0) Gecko/20100101 Firefox/36.0",
+            "Host": "cloud-api.yandex.net"
         }
 
-    def get_base_url(self):
-        return YandexDiskRestClient._base_url
-
-    def get_file_metadata(self):
+    def get_disk_metadata(self):
         url = self._base_url + ""
 
         r = requests.get(url, headers=self.base_headers)
-        print(r.text)
+        json_dict = r.json()
+        print(json_dict)
+
+        disk = Disk(json_dict["trash_size"], json_dict["total_space"], json_dict["used_space"],
+                    json_dict["system_folders"])
+        return disk
+
+    def get_list_of_files(self, path_to_folder):
+        url = self._base_url + "/resources"
+
+        payload = {'path': path_to_folder}
+        r = requests.get(url, headers=self.base_headers, params=payload)
+
+        json_dict = r.json()
+        print(json_dict)
 
 
 def main():
@@ -34,7 +95,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(login, password, token)
-    client.get_file_metadata()
+    client.get_list_of_files("/")
 
 
 if __name__ == "__main__":
