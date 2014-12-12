@@ -34,6 +34,11 @@ class File(Element):
         self.mime_type = mime_type
         self.size = size
 
+    @staticmethod
+    def get_instance(dictionary_params):
+        f = File(dictionary_params["name"], dictionary_params["created"], dictionary_params["modified"], dictionary_params["media_type"], dictionary_params["path"], dictionary_params["md5"], dictionary_params["type"], dictionary_params["mime_type"], dictionary_params["size"])
+        return f
+
     def is_dir(self):
         return False
 
@@ -57,7 +62,7 @@ class Directory(Element):
                 directory.children.append(d)
 
             if item["type"] == "file":
-                f = File(item["name"], item["created"], item["modified"], item["media_type"], item["path"], item["md5"], item["type"], item["mime_type"], item["size"])
+                f = File.get_instance(item)
                 directory.children.append(f)
 
         return directory
@@ -153,7 +158,23 @@ class YandexDiskRestClient:
         self._check_code(r)
 
         json_dict = r.json()
-        return json_dict["href"];
+        return json_dict["href"]
+
+    def get_list_of_all_files(self):
+        url = self._base_url + "/resources/files"
+
+        r = requests.get(url, headers=self.base_headers)
+        self._check_code(r)
+
+        json_dict = r.json()
+
+        files = []
+
+        for item in json_dict["items"]:
+            f = File.get_instance(item)
+            files.append(f)
+
+        return files
 
     def _check_code(self, req):
         if not str(req.status_code).startswith("2"):
@@ -166,7 +187,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(login, password, token)
-    print(client.get_download_link_to_file("/Мишки.jpg"))
+    client.get_list_of_all_files()
 
 
 if __name__ == "__main__":
