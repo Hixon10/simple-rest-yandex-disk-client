@@ -138,6 +138,13 @@ class YandexDiskRestClient:
         r = requests.delete(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
+    def copy_folder_of_file(self, path_from, path_to):
+        url = self._base_url + "/resources/copy"
+
+        payload = {'path': path_to, 'from': path_from}
+        r = requests.post(url, headers=self.base_headers, params=payload)
+        self._check_code(r)
+
     def _check_code(self, req):
         if not str(req.status_code).startswith("2"):
             raise YandexDiskException(req.status_code, req.text)
@@ -149,7 +156,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(login, password, token)
-    client.remove_folder_or_file("test-folder2")
+    client.copy_folder_of_file("/Мишки.jpg", "/auto-2/Мишки.jpg")
 
 
 if __name__ == "__main__":
