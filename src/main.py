@@ -150,6 +150,13 @@ class YandexDiskRestClient:
         r2 = requests.put(upload_link, headers=self.base_headers, files=files)
         self._check_code(r2)
 
+    def upload_file_from_url(self, from_url, path_to):
+        url = self._base_url + "/resources/upload"
+
+        payload = {'path': path_to, 'url': from_url}
+        r = requests.post(url, headers=self.base_headers, params=payload)
+        self._check_code(r)
+
     def _get_dictionary_of_published_files(self):
         url = self._base_url + "/resources/public"
 
@@ -169,7 +176,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(token)
-    client.upload_file("C:\\Users\\Public\\Pictures\\Sample Pictures\\Desert.jpg", "/Desert213.jpg")
+    client.upload_file_from_url("", "Pocket-Heroes_11.jpg")
 
 
 if __name__ == "__main__":
