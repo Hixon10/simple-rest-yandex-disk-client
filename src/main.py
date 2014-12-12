@@ -79,7 +79,7 @@ class YandexDiskRestClient:
         return json_dict["href"]
 
     def get_published_files(self):
-        json_dict = self.get_dictionary_of_published_files()
+        json_dict = self._get_dictionary_of_published_files()
 
         files = []
 
@@ -96,7 +96,7 @@ class YandexDiskRestClient:
         r = requests.put(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
-        files = self.get_dictionary_of_published_files()
+        files = self._get_dictionary_of_published_files()
 
         for file in files["items"]:
             if str(file["path"]).endswith(path):
@@ -127,7 +127,7 @@ class YandexDiskRestClient:
         r = requests.post(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
-    def get_dictionary_of_published_files(self):
+    def _get_dictionary_of_published_files(self):
         url = self._base_url + "/resources/public"
 
         r = requests.get(url, headers=self.base_headers)
