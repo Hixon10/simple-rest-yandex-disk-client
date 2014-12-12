@@ -13,3 +13,6 @@ Simple REST Yandex.Disk Client - REST клиент для Yandex.Disk на Pytho
 9. Делать публично-доступными файлы и папки
 10. Загружать пользовательские файлы на Yandex.Disk
 11. Загружать файлы по URL на Yandex.Disk
+
+##Зависимости:
+1. requests - <a href="https://github.com/kennethreitz/requests/">https://github.com/kennethreitz/requests/</a>
