@@ -121,8 +121,15 @@ class YandexDiskRestClient:
         d = Directory.get_instance(json_dict)
         return d
 
+    def create_folder(self, path_to_folder):
+        url = self._base_url + "/resources"
+
+        payload = {'path': path_to_folder}
+        r = requests.put(url, headers=self.base_headers, params=payload)
+        self._check_code(r)
+
     def _check_code(self, req):
-        if req.status_code != 200:
+        if not str(req.status_code).startswith("2"):
             raise YandexDiskException(req.status_code, req.text)
 
 
@@ -132,7 +139,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(login, password, token)
-    client.get_content_of_folder("/")
+    client.create_folder("a493-43h3wofn")
 
 
 if __name__ == "__main__":
