@@ -44,12 +44,33 @@ class File(Element):
 class Directory(Element):
     def __init__(self, name, created, modified, path, typ):
         super().__init__(name, created, modified, path, typ)
+        self.children = []
+
+    @staticmethod
+    def get_instance(dictionary_params):
+        directory = Directory(dictionary_params["name"], dictionary_params["created"], dictionary_params["modified"],
+                              dictionary_params["path"], dictionary_params["type"])
+
+        for item in dictionary_params["_embedded"]["items"]:
+            if item["type"] == "dir":
+                d = Directory(item["name"], item["created"], item["modified"], item["path"], item["type"])
+                directory.children.append(d)
+
+            if item["type"] == "file":
+                f = File(item["name"], item["created"], item["modified"], item["media_type"], item["path"], item["md5"], item["type"], item["mime_type"], item["size"])
+                directory.children.append(f)
+
+        return directory
+
+    def get_children(self):
+        return self.children
 
     def is_dir(self):
         return True
 
     def is_file(self):
         return False
+
 
 class YandexDiskException(Exception):
     code = None
@@ -60,6 +81,7 @@ class YandexDiskException(Exception):
 
     def __str__(self):
         return "%d. %s" % (self.code, super(YandexDiskException, self).__str__())
+
 
 class YandexDiskRestClient:
     _base_url = "https://cloud-api.yandex.net:443/v1/disk"
@@ -80,26 +102,24 @@ class YandexDiskRestClient:
         url = self._base_url + ""
 
         r = requests.get(url, headers=self.base_headers)
-
         self._check_code(r)
 
         json_dict = r.json()
-        print(json_dict)
 
         disk = Disk(json_dict["trash_size"], json_dict["total_space"], json_dict["used_space"],
                     json_dict["system_folders"])
         return disk
 
-    def get_list_of_files(self, path_to_folder):
+    def get_content_of_folder(self, path_to_folder):
         url = self._base_url + "/resources"
 
         payload = {'path': path_to_folder}
         r = requests.get(url, headers=self.base_headers, params=payload)
-
         self._check_code(r)
 
         json_dict = r.json()
-        print(json_dict)
+        d = Directory.get_instance(json_dict)
+        return d
 
     def _check_code(self, req):
         if req.status_code != 200:
@@ -112,7 +132,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(login, password, token)
-    client.get_list_of_files("/")
+    client.get_content_of_folder("/")
 
 
 if __name__ == "__main__":
