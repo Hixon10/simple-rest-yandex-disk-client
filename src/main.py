@@ -2,98 +2,16 @@
 
 import requests
 
-
-class Disk:
-    def __init__(self, trash_size, total_space, used_space, system_folders):
-        self.trash_size = trash_size
-        self.total_space = total_space
-        self.used_space = used_space
-        self.system_folders = system_folders
-
-
-class Element:
-    def __init__(self, name, created, modified, path, typ):
-        self.name = name
-        self.created = created
-        self.modified = modified
-        self.path = path
-        self.type = typ
-
-    def is_dir(self):
-        return False
-
-    def is_file(self):
-        return False
-
-
-class File(Element):
-    def __init__(self, name, created, modified, media_type, path, md5, typ, mime_type, size):
-        super().__init__(name, created, modified, path, typ)
-        self.media_type = media_type
-        self.md5 = md5
-        self.mime_type = mime_type
-        self.size = size
-
-    @staticmethod
-    def get_instance(dictionary_params):
-        f = File(dictionary_params["name"], dictionary_params["created"], dictionary_params["modified"], dictionary_params["media_type"], dictionary_params["path"], dictionary_params["md5"], dictionary_params["type"], dictionary_params["mime_type"], dictionary_params["size"])
-        return f
-
-    def is_dir(self):
-        return False
-
-    def is_file(self):
-        return True
-
-
-class Directory(Element):
-    def __init__(self, name, created, modified, path, typ):
-        super().__init__(name, created, modified, path, typ)
-        self.children = []
-
-    @staticmethod
-    def get_instance(dictionary_params):
-        directory = Directory(dictionary_params["name"], dictionary_params["created"], dictionary_params["modified"],
-                              dictionary_params["path"], dictionary_params["type"])
-
-        for item in dictionary_params["_embedded"]["items"]:
-            if item["type"] == "dir":
-                d = Directory(item["name"], item["created"], item["modified"], item["path"], item["type"])
-                directory.children.append(d)
-
-            if item["type"] == "file":
-                f = File.get_instance(item)
-                directory.children.append(f)
-
-        return directory
-
-    def get_children(self):
-        return self.children
-
-    def is_dir(self):
-        return True
-
-    def is_file(self):
-        return False
-
-
-class YandexDiskException(Exception):
-    code = None
-
-    def __init__(self, code, text):
-        super(YandexDiskException, self).__init__(text)
-        self.code = code
-
-    def __str__(self):
-        return "%d. %s" % (self.code, super(YandexDiskException, self).__str__())
+from src.Directory import Directory
+from src.Disk import Disk
+from src.File import File
+from src.YandexDiskException import YandexDiskException
 
 
 class YandexDiskRestClient:
     _base_url = "https://cloud-api.yandex.net:443/v1/disk"
 
-    def __init__(self, login, password, token):
-        self.login = login
-        self.password = password
+    def __init__(self, token):
         self.token = token
 
         self.base_headers = {
@@ -161,12 +79,7 @@ class YandexDiskRestClient:
         return json_dict["href"]
 
     def get_published_files(self):
-        url = self._base_url + "/resources/public"
-
-        r = requests.get(url, headers=self.base_headers)
-        self._check_code(r)
-
-        json_dict = r.json()
+        json_dict = self.get_dictionary_of_published_files()
 
         files = []
 
@@ -180,11 +93,16 @@ class YandexDiskRestClient:
         url = self._base_url + "/resources/publish"
 
         payload = {'path': path}
-        r = requests.get(url, headers=self.base_headers, params=payload)
+        r = requests.put(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
-        json_dict = r.json()
-        return json_dict["href"]
+        files = self.get_dictionary_of_published_files()
+
+        for file in files["items"]:
+            if str(file["path"]).endswith(path):
+                return file["public_url"]
+
+        return ""
 
     def get_list_of_all_files(self):
         url = self._base_url + "/resources/files"
@@ -209,6 +127,14 @@ class YandexDiskRestClient:
         r = requests.post(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
+    def get_dictionary_of_published_files(self):
+        url = self._base_url + "/resources/public"
+
+        r = requests.get(url, headers=self.base_headers)
+        self._check_code(r)
+
+        return r.json()
+
     def _check_code(self, req):
         if not str(req.status_code).startswith("2"):
             raise YandexDiskException(req.status_code, req.text)
@@ -219,8 +145,8 @@ def main():
     password = "fj$*(fhgwuf3wohfe4wwoenfD"
     token = "ea191c8546be4149a6319d9959328831"
 
-    client = YandexDiskRestClient(login, password, token)
-    client.get_published_files()
+    client = YandexDiskRestClient(token)
+    print(client.get_public_link_to_folder_or_file("Горы.jpg"))
 
 
 if __name__ == "__main__":
