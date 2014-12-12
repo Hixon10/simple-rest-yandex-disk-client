@@ -145,6 +145,16 @@ class YandexDiskRestClient:
         r = requests.post(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
+    def get_download_link_to_file(self, path_to_file):
+        url = self._base_url + "/resources/download"
+
+        payload = {'path': path_to_file}
+        r = requests.get(url, headers=self.base_headers, params=payload)
+        self._check_code(r)
+
+        json_dict = r.json()
+        return json_dict["href"];
+
     def _check_code(self, req):
         if not str(req.status_code).startswith("2"):
             raise YandexDiskException(req.status_code, req.text)
@@ -156,7 +166,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(login, password, token)
-    client.copy_folder_of_file("/Мишки.jpg", "/auto-2/Мишки.jpg")
+    print(client.get_download_link_to_file("/Мишки.jpg"))
 
 
 if __name__ == "__main__":
