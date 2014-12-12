@@ -104,6 +104,13 @@ class YandexDiskRestClient:
 
         return ""
 
+    def unpublish_folder_or_file(self, path):
+        url = self._base_url + "/resources/unpublish"
+
+        payload = {'path': path}
+        r = requests.put(url, headers=self.base_headers, params=payload)
+        self._check_code(r)
+
     def get_list_of_all_files(self):
         url = self._base_url + "/resources/files"
 
@@ -146,7 +153,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(token)
-    print(client.get_public_link_to_folder_or_file("Горы.jpg"))
+    client.unpublish_folder_or_file("Горы.jpg")
 
 
 if __name__ == "__main__":
