@@ -160,6 +160,32 @@ class YandexDiskRestClient:
         json_dict = r.json()
         return json_dict["href"]
 
+    def get_published_files(self):
+        url = self._base_url + "/resources/public"
+
+        r = requests.get(url, headers=self.base_headers)
+        self._check_code(r)
+
+        json_dict = r.json()
+
+        files = []
+
+        for item in json_dict["items"]:
+            f = File.get_instance(item)
+            files.append(f)
+
+        return files
+
+    def get_public_link_to_folder_or_file(self, path):
+        url = self._base_url + "/resources/publish"
+
+        payload = {'path': path}
+        r = requests.get(url, headers=self.base_headers, params=payload)
+        self._check_code(r)
+
+        json_dict = r.json()
+        return json_dict["href"]
+
     def get_list_of_all_files(self):
         url = self._base_url + "/resources/files"
 
@@ -194,7 +220,7 @@ def main():
     token = "ea191c8546be4149a6319d9959328831"
 
     client = YandexDiskRestClient(login, password, token)
-    client.move_folder_of_file("/Санкт-Петербург.jpg", "/auto-2/Санкт-Петербург.jpg")
+    client.get_published_files()
 
 
 if __name__ == "__main__":
