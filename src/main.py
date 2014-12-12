@@ -51,7 +51,15 @@ class Directory(Element):
     def is_file(self):
         return False
 
+class YandexDiskException(Exception):
+    code = None
 
+    def __init__(self, code, text):
+        super(YandexDiskException, self).__init__(text)
+        self.code = code
+
+    def __str__(self):
+        return "%d. %s" % (self.code, super(YandexDiskException, self).__str__())
 
 class YandexDiskRestClient:
     _base_url = "https://cloud-api.yandex.net:443/v1/disk"
@@ -72,6 +80,9 @@ class YandexDiskRestClient:
         url = self._base_url + ""
 
         r = requests.get(url, headers=self.base_headers)
+
+        self._check_code(r)
+
         json_dict = r.json()
         print(json_dict)
 
@@ -85,8 +96,14 @@ class YandexDiskRestClient:
         payload = {'path': path_to_folder}
         r = requests.get(url, headers=self.base_headers, params=payload)
 
+        self._check_code(r)
+
         json_dict = r.json()
         print(json_dict)
+
+    def _check_code(self, req):
+        if req.status_code != 200:
+            raise YandexDiskException(req.status_code, req.text)
 
 
 def main():
