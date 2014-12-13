@@ -79,16 +79,22 @@ class YandexDiskRestClient:
         json_dict = r.json()
         return json_dict["href"]
 
-    def get_published_files(self):
+    def get_published_elements(self):
         json_dict = self._get_dictionary_of_published_files()
 
-        files = []
+        elements = []
 
         for item in json_dict["items"]:
-            f = File.get_instance(item)
-            files.append(f)
+            el = None
 
-        return files
+            if item["type"] == "dir":
+                el = Directory.get_instance(item)
+            elif item["type"] == "file":
+                el = File.get_instance(item)
+
+            elements.append(el)
+
+        return elements
 
     def get_public_link_to_folder_or_file(self, path):
         url = self._base_url + "/resources/publish"
