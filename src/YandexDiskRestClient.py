@@ -23,7 +23,7 @@ class YandexDiskRestClient:
         }
 
     def get_disk_metadata(self):
-        url = self._base_url + ""
+        url = self._base_url
 
         r = requests.get(url, headers=self.base_headers)
         self._check_code(r)
@@ -42,7 +42,7 @@ class YandexDiskRestClient:
         self._check_code(r)
 
         json_dict = r.json()
-        d = Directory.get_instance(json_dict)
+        d = Directory(**json_dict)
         return d
 
     def create_folder(self, path_to_folder):
@@ -85,14 +85,10 @@ class YandexDiskRestClient:
         elements = []
 
         for item in json_dict["items"]:
-            el = None
-
             if item["type"] == "dir":
-                el = Directory.get_instance(item)
+                elements.append(Directory(**item))
             elif item["type"] == "file":
-                el = File.get_instance(item)
-
-            elements.append(el)
+                elements.append(File(**item))
 
         return elements
 
@@ -129,7 +125,7 @@ class YandexDiskRestClient:
         files = []
 
         for item in json_dict["items"]:
-            f = File.get_instance(item)
+            f = File(**item)
             files.append(f)
 
         return files
@@ -151,9 +147,13 @@ class YandexDiskRestClient:
         json_dict = r.json()
         upload_link = json_dict["href"]
 
-        files = {'file': open(path_from, 'rb')}
+        uploaded_file = open(path_from, 'rb')
+        files = {'file': uploaded_file}
 
         r2 = requests.put(upload_link, headers=self.base_headers, files=files)
+
+        uploaded_file.close()
+
         self._check_code(r2)
 
     def upload_file_from_url(self, from_url, path_to):
