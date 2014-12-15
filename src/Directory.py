@@ -4,12 +4,9 @@ from src.File import File
 
 
 class Directory():
-    def __init__(self, _embedded=None, *initial_data, **kwargs):
+    def __init__(self, _embedded=None, **kwargs):
         self.children = []
 
-        for dictionary in initial_data:
-            for key in dictionary:
-                setattr(self, key, dictionary[key])
         for key in kwargs:
             setattr(self, key, kwargs[key])
 

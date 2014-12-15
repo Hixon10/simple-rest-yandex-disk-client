@@ -1,9 +1,6 @@
 #!/usr/bin/python3
 
 class File():
-    def __init__(self, *initial_data, **kwargs):
-        for dictionary in initial_data:
-            for key in dictionary:
-                setattr(self, key, dictionary[key])
+    def __init__(self, **kwargs):
         for key in kwargs:
             setattr(self, key, kwargs[key])
