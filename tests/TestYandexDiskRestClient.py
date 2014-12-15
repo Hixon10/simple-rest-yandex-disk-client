@@ -49,7 +49,7 @@ class TestYandexDiskRestClient(TestCase):
         child_folder = TestYandexDiskRestClient.id_generator(10)
         child_dir = self.client.create_folder(child_folder)
 
-        self.client.copy_folder_of_file("/" + child_folder, "/" + parent_folder + "/"  + child_folder)
+        self.client.copy_folder_or_file("/" + child_folder, "/" + parent_folder + "/"  + child_folder)
 
         par_dir2 = self.client.get_content_of_folder(parent_folder)
         self.assert_(len(par_dir2.children) == 1)
@@ -101,7 +101,7 @@ class TestYandexDiskRestClient(TestCase):
         child_folder = TestYandexDiskRestClient.id_generator(10)
         child_dir = self.client.create_folder(child_folder)
 
-        self.client.move_folder_of_file("/" + child_folder, "/" + parent_folder + "/"  + child_folder)
+        self.client.move_folder_or_file("/" + child_folder, "/" + parent_folder + "/"  + child_folder)
 
         par_dir2 = self.client.get_content_of_folder(parent_folder)
         self.assert_(len(par_dir2.children) == 1)

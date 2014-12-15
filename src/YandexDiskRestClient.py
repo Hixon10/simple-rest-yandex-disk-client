@@ -10,6 +10,10 @@ from src.YandexDiskException import YandexDiskException
 
 
 class YandexDiskRestClient:
+    '''
+    Implementation of https://tech.yandex.ru/disk/poligon/
+    '''
+
     _base_url = "https://cloud-api.yandex.net:443/v1/disk"
 
     def __init__(self, token):
@@ -23,8 +27,7 @@ class YandexDiskRestClient:
 
     def get_disk_metadata(self):
         """
-        Получить метаинформацию о диске пользователя
-        :return: метаинформация о диске
+        :return: disk metadata
         """
         url = self._base_url
 
@@ -33,15 +36,13 @@ class YandexDiskRestClient:
 
         json_dict = r.json()
 
-        disk = Disk(json_dict["trash_size"], json_dict["total_space"], json_dict["used_space"],
+        return Disk(json_dict["trash_size"], json_dict["total_space"], json_dict["used_space"],
                     json_dict["system_folders"])
-        return disk
 
     def get_content_of_folder(self, path_to_folder):
         """
-        Получить содержимое папки
-        :param path_to_folder: путь до папки
-        :return: содержимое папки
+        :param path_to_folder: path to folder
+        :return: content of folder
         """
         url = self._base_url + "/resources"
 
@@ -50,14 +51,12 @@ class YandexDiskRestClient:
         self._check_code(r)
 
         json_dict = r.json()
-        d = Directory(**json_dict)
-        return d
+        return Directory(**json_dict)
 
     def create_folder(self, path_to_folder):
         """
-        Создать папку
-        :param path_to_folder: путь до папки
-        :return: созданная папка
+        :param path_to_folder: path to folder
+        :return: created folder
         """
         url = self._base_url + "/resources"
 
@@ -65,13 +64,12 @@ class YandexDiskRestClient:
         r = requests.put(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
-        d = self.get_content_of_folder(path_to_folder)
-        return d
+        return self.get_content_of_folder(path_to_folder)
 
     def remove_folder_or_file(self, path):
         """
-        Удалить папку или файл
-        :param path: путь до ресурса
+        Remove folder or file
+        :param path: path to file or folder
         """
         url = self._base_url + "/resources"
 
@@ -79,11 +77,11 @@ class YandexDiskRestClient:
         r = requests.delete(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
-    def copy_folder_of_file(self, path_from, path_to):
+    def copy_folder_or_file(self, path_from, path_to):
         """
-        Копировать файл или папку
-        :param path_from: путь ОТ
-        :param path_to: путь КУДА
+        Copy folder or file
+        :param path_from: from path
+        :param path_to: to path
         """
         url = self._base_url + "/resources/copy"
 
@@ -93,9 +91,8 @@ class YandexDiskRestClient:
 
     def get_download_link_to_file(self, path_to_file):
         """
-        Получить ссылку на скачивание файла
-        :param path_to_file: путь до файла
-        :return: ссылка на файл
+        :param path_to_file: path to file
+        :return: download link to file
         """
         url = self._base_url + "/resources/download"
 
@@ -103,13 +100,11 @@ class YandexDiskRestClient:
         r = requests.get(url, headers=self.base_headers, params=payload)
         self._check_code(r)
 
-        json_dict = r.json()
-        return json_dict["href"]
+        return r.json()
 
     def get_published_elements(self):
         """
-        Получить список публичных элементов диска
-        :return: список публичных элементов диска
+        :return: published elements
         """
         json_dict = self._get_dictionary_of_published_files()
 
@@ -125,9 +120,8 @@ class YandexDiskRestClient:
 
     def get_public_link_to_folder_or_file(self, path):
         """
-        Получить публичную ссылку на файл или папку
-        :param path: путь до файла или папки
-        :return: публичная ссылка на файл или папку
+        :param path: path
+        :return: public link to folder or file
         """
         url = self._base_url + "/resources/publish"
 
@@ -145,8 +139,8 @@ class YandexDiskRestClient:
 
     def unpublish_folder_or_file(self, path):
         """
-        Сделать файл или папку приватными
-        :param path: путь до файла или папки
+        Unpublish folder of file
+        :param path: path to file or folder
         """
         url = self._base_url + "/resources/unpublish"
 
@@ -156,8 +150,7 @@ class YandexDiskRestClient:
 
     def get_list_of_all_files(self):
         """
-        Получить список всех файлов на диске
-        :return: список всех файлов на диске
+        :return: List of all files
         """
         url = self._base_url + "/resources/files"
 
@@ -174,11 +167,11 @@ class YandexDiskRestClient:
 
         return files
 
-    def move_folder_of_file(self, path_from, path_to):
+    def move_folder_or_file(self, path_from, path_to):
         """
-        Переместить файл или папку
-        :param path_from: путь ОТ
-        :param path_to: путь ДО
+        Move folder or file
+        :param path_from: path from
+        :param path_to: path to
         """
         url = self._base_url + "/resources/move"
 
@@ -188,9 +181,9 @@ class YandexDiskRestClient:
 
     def upload_file(self, path_from, path_to):
         """
-        Загрузить файл
-        :param path_from: физический путь до файла
-        :param path_to: путь на яндекс диске
+        Upload file
+        :param path_from: path from
+        :param path_to: path to yandex disk
         """
         url = self._base_url + "/resources/upload"
 
@@ -212,9 +205,9 @@ class YandexDiskRestClient:
 
     def upload_file_from_url(self, from_url, path_to):
         """
-        Загрузить файл по URL
-        :param from_url: путь до файла URL
-        :param path_to: путь на яндекс диске
+        Upload file by URL
+        :param from_url: URL path from
+        :param path_to: path to yandex disk
         """
         url = self._base_url + "/resources/upload"
 
