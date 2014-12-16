@@ -195,13 +195,14 @@ class YandexDiskRestClient:
         upload_link = json_dict["href"]
 
         uploaded_file = open(path_from, 'rb')
-        files = {'file': uploaded_file}
 
-        r2 = requests.put(upload_link, headers=self.base_headers, files=files)
+        try:
+            files = {'file': uploaded_file}
 
-        uploaded_file.close()
-
-        self._check_code(r2)
+            r2 = requests.put(upload_link, headers=self.base_headers, files=files)
+            self._check_code(r2)
+        finally:
+            uploaded_file.close()
 
     def upload_file_from_url(self, from_url, path_to):
         """
