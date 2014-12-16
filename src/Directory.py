@@ -8,7 +8,8 @@ class Directory():
         self.children = []
 
         for key in kwargs:
-            setattr(self, key, kwargs[key])
+            if key is not "_embedded":
+                setattr(self, key, kwargs[key])
 
         if "_embedded" in kwargs:
             for item in kwargs["_embedded"]['items']:
