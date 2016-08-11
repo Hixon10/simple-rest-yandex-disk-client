@@ -25,18 +25,14 @@ class ExamplesOfUsingOfYandexDiskRestClient:
             print(exp)
             sys.exit(1)
 
-    def creating_of_folder(self):
-        folder_name = self.random_name_of_folder
-
-        try:
-            self.client.create_folder(folder_name)
-            self.client.create_folder(self.random_name_of_parent_folder)
-            self.client.create_folder(self.random_name_of_child_folder)
-            self.client.create_folder(self.random_name_of_child_2_folder)
-            print("Folders was created")
-        except YandexDiskException as exp:
-            print(exp)
-            sys.exit(1)
+    def creating_of_folder(self, folder_name):
+        folders = folder_name.split('/')
+        for i in range(1, len(folders)+1):
+            try:
+                self.client.create_folder('/'.join([f for f in folders[:i]]))
+            except YandexDiskException as exp:
+                logging.info(exp)
+                pass
 
     def get_meta_of_folder(self):
         try:
@@ -125,7 +121,7 @@ class ExamplesOfUsingOfYandexDiskRestClient:
 
     def run(self):
         self.get_disk_metadata()
-        self.creating_of_folder()
+        self.creating_of_folder(self.random_name_of_folder + '/' + self.random_name_of_parent_folder + '/' + self.random_name_of_child_folder)
         self.get_meta_of_folder()
         self.remove_folder_or_file()
         self.copy_folder_of_file()
