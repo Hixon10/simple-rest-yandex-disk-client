@@ -1,7 +1,7 @@
 Simple REST Yandex.Disk Client - REST клиент для Yandex.Disk на Python 3
 ========================================================================
 
-##Возможности:
+## Возможности:
 1. Получать метаинформацию о диске пользователя
 2. Получать метаинформацию о файле или каталоге
 3. Создать папки
@@ -14,5 +14,5 @@ Simple REST Yandex.Disk Client - REST клиент для Yandex.Disk на Pytho
 10. Загружать пользовательские файлы на Yandex.Disk
 11. Загружать файлы по URL на Yandex.Disk
 
-##Зависимости:
+## Зависимости:
 1. requests - <a href="https://github.com/kennethreitz/requests/">https://github.com/kennethreitz/requests/</a>
